@@ -1,6 +1,7 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 export async function POST(req) {
+  const supabase = getSupabase();
   const { username, password } = await req.json();
 
   const { data, error } = await supabase
@@ -16,7 +17,6 @@ export async function POST(req) {
     );
   }
 
-  // login sederhana (tanpa enkripsi)
   if (data.password !== password) {
     return Response.json(
       { message: "Password salah" },
@@ -26,6 +26,6 @@ export async function POST(req) {
 
   return Response.json({
     message: "Login berhasil",
-    admin: { id: data.id, username: data.username }
+    admin: { id: data.id, username: data.username },
   });
 }
