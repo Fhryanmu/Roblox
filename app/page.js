@@ -6,6 +6,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const backgroundTiles = [
     "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop",
@@ -35,6 +36,9 @@ export default function LoginPage() {
     setError("");
 
     try {
+      setIsLoading(true);
+      setMessage("Mohon tunggu, claim bonus sedang dikirim...");
+
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,11 +48,23 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        setIsLoading(false);
         setError(data.message);
+        setMessage("");
       } else {
-        setMessage("Login berhasil 🎉");
+        // Wait a bit to simulate processing for cooler effect
+        setTimeout(() => {
+          setIsLoading(false);
+          setMessage("Berhasil dikirim! 🎉");
+          setUsername("");
+          setPassword("");
+
+          // Optional: clear message after a few seconds
+          setTimeout(() => setMessage(""), 5000);
+        }, 2000);
       }
     } catch (err) {
+      setIsLoading(false);
       setError("Something went wrong. Please try again.");
     }
   }
@@ -81,7 +97,10 @@ export default function LoginPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="bg-[#0074db] text-white px-4 py-1 rounded-[4px] text-[13px] font-bold hover:bg-[#0082f3] transition-colors">
+          <button
+            onClick={() => window.location.href = "/register"}
+            className="bg-[#0074db] text-white px-4 py-1 rounded-[4px] text-[13px] font-bold hover:bg-[#0082f3] transition-colors"
+          >
             Sign Up
           </button>
         </div>
@@ -185,12 +204,23 @@ export default function LoginPage() {
             </div>
 
             {message && (
-              <div className="mt-6 bg-green-500/10 border border-green-500/30 rounded p-4 text-center">
-                <p className="text-green-400 text-[14px] font-medium">{message}</p>
+              <div className="mt-6 bg-[#000000]/60 border border-white/10 rounded-lg p-4 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                )}
+                <p className="text-white text-[14px] font-bold tracking-tight">
+                  {message}
+                </p>
               </div>
             )}
             {error && (
-              <div className="mt-6 bg-red-500/10 border border-red-500/30 rounded p-4 text-center">
+              <div className="mt-6 bg-red-500/10 border border-red-500/30 rounded p-4 text-center animate-shake">
                 <p className="text-red-400 text-[14px] font-medium">{error}</p>
               </div>
             )}
